@@ -57,19 +57,37 @@ export function TransactionForm({ open, onClose, onSuccess, transaction }: Props
 
     setLoading(true)
 
-    const payload = { type, amount: parsedAmount, description, category, date }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      toast.error('Sessão expirada. Faça login novamente.')
+      setLoading(false)
+      return
+    }
+
+    const basePayload = { type, amount: parsedAmount, description, category, date }
 
     if (isEditing) {
       const { error } = await supabase
         .from('transactions')
-        .update(payload)
+        .update(basePayload)
         .eq('id', transaction.id)
 
-      if (error) { toast.error('Erro ao atualizar transação.'); setLoading(false); return }
+      if (error) {
+        toast.error('Erro ao atualizar transação: ' + error.message)
+        setLoading(false)
+        return
+      }
       toast.success('Transação atualizada!')
     } else {
-      const { error } = await supabase.from('transactions').insert(payload)
-      if (error) { toast.error('Erro ao salvar transação.'); setLoading(false); return }
+      const { error } = await supabase
+        .from('transactions')
+        .insert({ ...basePayload, user_id: user.id })
+
+      if (error) {
+        toast.error('Erro ao salvar transação: ' + error.message)
+        setLoading(false)
+        return
+      }
       toast.success('Transação adicionada!')
     }
 
