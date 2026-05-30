@@ -52,8 +52,8 @@ export default function TransactionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Transações</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Gerencie suas receitas e despesas</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Transações</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Gerencie suas receitas e despesas</p>
         </div>
         <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" /> Nova transação

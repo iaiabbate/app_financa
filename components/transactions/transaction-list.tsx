@@ -129,7 +129,7 @@ export function TransactionList({ transactions, onRefresh }: Props) {
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {transactions.map((t) => (
-          <div key={t.id} className="bg-white rounded-xl border border-slate-100 p-4 flex items-center justify-between gap-3">
+          <div key={t.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className={cn(
                 'w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0',
@@ -150,7 +150,7 @@ export function TransactionList({ transactions, onRefresh }: Props) {
                 {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
               </span>
               <DropdownMenu>
-                <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md h-7 w-7 text-slate-500 hover:bg-slate-100 transition-colors">
+                <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md h-7 w-7 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                   <MoreHorizontal className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

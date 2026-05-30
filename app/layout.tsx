@@ -1,10 +1,17 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import { Fraunces, Figtree } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/layout/theme-provider'
 
-const geist = Geist({
-  variable: '--font-geist',
+const fraunces = Fraunces({
+  variable: '--font-display',
+  subsets: ['latin'],
+  axes: ['SOFT', 'WONK', 'opsz'],
+})
+
+const figtree = Figtree({
+  variable: '--font-body',
   subsets: ['latin'],
 })
 
@@ -15,10 +22,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">
-        {children}
-        <Toaster position="top-right" richColors />
+    <html lang="pt-BR" className={`${fraunces.variable} ${figtree.variable} h-full`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-body antialiased">
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          {children}
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
       </body>
     </html>
   )

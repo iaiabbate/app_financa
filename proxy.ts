@@ -9,9 +9,7 @@ export async function proxy(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
@@ -24,19 +22,22 @@ export async function proxy(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const { pathname } = request.nextUrl
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/signup')
+  const isPublicPage = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup')
+  const isProtectedPage = pathname.startsWith('/dashboard') || pathname.startsWith('/transactions')
 
-  if (!user && !isAuthPage) {
+  // Redirect logged-in users away from public pages to dashboard
+  if (user && isPublicPage) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthPage) {
+  // Redirect unauthenticated users away from protected pages to landing
+  if (!user && isProtectedPage) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
