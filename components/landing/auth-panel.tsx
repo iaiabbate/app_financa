@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Loader2, Mail, CheckCircle2 } from 'lucide-react'
+import { Loader2, CheckCircle2, MailCheck } from 'lucide-react'
 
 type Tab = 'login' | 'signup'
 
@@ -17,18 +17,32 @@ type Props = {
 }
 
 export function AuthPanel({ tab, onTabChange }: Props) {
+  const [forgotView, setForgotView] = useState(false)
+
+  function handleTabChange(t: Tab) {
+    setForgotView(false)
+    onTabChange(t)
+  }
+
+  if (tab === 'login' && forgotView) {
+    return <ForgotPasswordForm onBack={() => setForgotView(false)} />
+  }
+
   return (
     <div>
       {tab === 'login' ? (
-        <LoginForm onSignupClick={() => onTabChange('signup')} />
+        <LoginForm
+          onSignupClick={() => handleTabChange('signup')}
+          onForgotClick={() => setForgotView(true)}
+        />
       ) : (
-        <SignupForm onLoginClick={() => onTabChange('login')} />
+        <SignupForm onLoginClick={() => handleTabChange('login')} />
       )}
     </div>
   )
 }
 
-function LoginForm({ onSignupClick }: { onSignupClick: () => void }) {
+function LoginForm({ onSignupClick, onForgotClick }: { onSignupClick: () => void; onForgotClick: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -76,7 +90,16 @@ function LoginForm({ onSignupClick }: { onSignupClick: () => void }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="login-password" className="text-slate-700 text-sm font-medium">Senha</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="login-password" className="text-slate-700 text-sm font-medium">Senha</Label>
+            <button
+              type="button"
+              onClick={onForgotClick}
+              className="text-xs text-blue-600 hover:underline font-medium"
+            >
+              Esqueceu a senha?
+            </button>
+          </div>
           <Input
             id="login-password"
             type="password"
@@ -109,6 +132,87 @@ function LoginForm({ onSignupClick }: { onSignupClick: () => void }) {
             Criar gratuitamente
           </button>
         </p>
+      </div>
+    </div>
+  )
+}
+
+function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+  const supabase = createClient()
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) {
+      toast.error(error.message)
+      setLoading(false)
+      return
+    }
+    setSent(true)
+    setLoading(false)
+  }
+
+  if (sent) {
+    return (
+      <div className="text-center py-6">
+        <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MailCheck className="w-7 h-7 text-blue-500" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-800 mb-2">E-mail enviado!</h3>
+        <p className="text-slate-500 text-sm mb-6">
+          Enviamos o link de recuperação para <strong className="text-slate-700">{email}</strong>. Verifique sua caixa de entrada e spam.
+        </p>
+        <button onClick={onBack} className="text-blue-600 text-sm font-medium hover:underline">
+          Voltar para o login
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-slate-800" style={{ fontFamily: 'var(--font-display)' }}>
+          Recuperar senha
+        </h2>
+        <p className="text-slate-500 text-sm mt-1">Enviaremos um link para criar uma nova senha</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="forgot-email" className="text-slate-700 text-sm font-medium">E-mail cadastrado</Label>
+          <Input
+            id="forgot-email"
+            type="email"
+            placeholder="voce@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className="h-11 bg-white border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
+          />
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium mt-2"
+          disabled={loading}
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+          Enviar link de recuperação
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <button onClick={onBack} className="text-sm text-blue-600 font-medium hover:underline">
+          Voltar para o login
+        </button>
       </div>
     </div>
   )
