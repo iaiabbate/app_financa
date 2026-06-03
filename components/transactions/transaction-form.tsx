@@ -35,7 +35,11 @@ export function TransactionForm({ open, onClose, onSuccess, transaction }: Props
   const supabase = createClient()
 
   const [type, setType] = useState<TransactionType>(transaction?.type ?? 'expense')
-  const [amount, setAmount] = useState(transaction ? String(transaction.amount) : '')
+  const [amount, setAmount] = useState(
+    transaction
+      ? transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : ''
+  )
   const [description, setDescription] = useState(transaction?.description ?? '')
   const [category, setCategory] = useState(transaction?.category ?? '')
   const [date, setDate] = useState(transaction?.date ?? new Date().toISOString().split('T')[0])
@@ -49,7 +53,7 @@ export function TransactionForm({ open, onClose, onSuccess, transaction }: Props
     e.preventDefault()
     if (!category) { toast.error('Selecione uma categoria.'); return }
 
-    const parsedAmount = parseFloat(amount.replace(',', '.'))
+    const parsedAmount = parseFloat(amount.replace(/\./g, '').replace(',', '.'))
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       toast.error('Valor inválido.')
       return
@@ -140,12 +144,14 @@ export function TransactionForm({ open, onClose, onSuccess, transaction }: Props
             <Label htmlFor="amount">Valor (R$)</Label>
             <Input
               id="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
+              type="text"
+              inputMode="decimal"
               placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^\d.,]/g, '')
+                setAmount(v)
+              }}
               required
             />
           </div>

@@ -93,14 +93,9 @@ export default function DashboardPage() {
         <>
           <SummaryCards summary={summary} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-3">
-              <CategoryChart transactions={transactions} />
-            </div>
-            <div className="lg:col-span-2">
-              <RecentTransactions transactions={transactions} />
-            </div>
-          </div>
+          <CategoryChart transactions={transactions} />
+
+          <RecentTransactions transactions={transactions} />
         </>
       )}
 
